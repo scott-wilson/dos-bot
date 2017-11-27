@@ -40,3 +40,24 @@ func init() {
     RegisterConnector("myConnector", bot, myConnector)
 }
 ```
+
+# New Bot
+
+```golang
+package mybot
+
+import "github.com/scott-wilson/dosbot"
+
+func main() {
+    bot := NewBot("test")
+
+    // Register actions first
+    dosbot.RegisterAction("listen", myAction)
+
+    // Register connectors
+    RegisterConnector("myConnector", bot, myConnector)
+
+    // Loop forever
+    for {}
+}
+```
