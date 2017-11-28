@@ -22,11 +22,11 @@ func init() {
 Creating new connections are as simple as this:
 
 ```golang
-func myConnector(bot Bot, input chan<- Event, output <-chan Event) {
+func myConnector(bot Bot, toActions chan<- Event, toChannel <-chan Event) {
     // Inputs
     go func() {
         // Query from service (Discord, Slack, Rocket.Chat, etc) here.
-        EmitActions("listen", "test", input)
+        EmitActions("listen", "test", toActions)
     }()
 
     // Outputs
@@ -36,8 +36,7 @@ func myConnector(bot Bot, input chan<- Event, output <-chan Event) {
 }
 
 func init() {
-    bot := NewBot("test")
-    RegisterConnector("myConnector", bot, myConnector)
+    RegisterConnector(myConnector)
 }
 ```
 
@@ -55,9 +54,9 @@ func main() {
     dosbot.RegisterAction("listen", myAction)
 
     // Register connectors
-    RegisterConnector("myConnector", bot, myConnector)
+    RegisterConnector(myConnector)
 
-    // Loop forever
-    for {}
+    // Run
+    Run(bot)
 }
 ```

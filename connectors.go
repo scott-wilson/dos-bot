@@ -4,21 +4,13 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"sync"
 )
 
-func RegisterConnector(name string, bot Bot, connector func(Bot, chan<- Event, <-chan Event) func() error) {
-	input := make(chan Event)
-	output := make(chan Event)
-	actionThreadPool(input, output)
-
-	mutex := &sync.Mutex{}
-	mutex.Lock()
-	defer mutex.Unlock()
-	closeFunctions = append(closeFunctions, connector(bot, input, output))
+func RegisterConnector(connector func(Bot, chan<- Event, <-chan Event) func() error) {
+	connections = append(connections, connector)
 }
 
-func TerminalConnector(bot Bot, input chan<- Event, output <-chan Event) func() error {
+func TerminalConnector(bot Bot, toActions chan<- Event, toChannel <-chan Event) func() error {
 	reader := bufio.NewReader(os.Stdin)
 
 	go func() {
@@ -26,10 +18,10 @@ func TerminalConnector(bot Bot, input chan<- Event, output <-chan Event) func() 
 			fmt.Print("Enter text: ")
 			text, _ := reader.ReadString('\n')
 
-			EmitActions("listen", text, input)
+			EmitActions("listen", text, toActions)
 
 			select {
-			case result := <-output:
+			case result := <-toChannel:
 				if err := result.Error(); err != nil {
 					if err == ErrNoActionFound {
 						continue

@@ -21,8 +21,8 @@ func EmitActions(event string, message string, connector chan<- Event) {
 	connector <- NewEvent(event, message, nil)
 }
 
-func actionWorker(eventsToActions <-chan Event, eventsToConnector chan<- Event) {
-	for event := range eventsToActions {
+func actionWorker(toActions <-chan Event, toConnector chan<- Event) {
+	for event := range toActions {
 		actions, ok := registeredActions[event.Type()]
 		actionFound := false
 
@@ -38,17 +38,17 @@ func actionWorker(eventsToActions <-chan Event, eventsToConnector chan<- Event) 
 			}
 
 			actionFound = true
-			eventsToConnector <- NewEvent(event.Type(), result, err)
+			toConnector <- NewEvent(event.Type(), result, err)
 		}
 
 		if !actionFound {
-			eventsToConnector <- NewEvent(event.Type(), "", ErrNoActionFound)
+			toConnector <- NewEvent(event.Type(), "", ErrNoActionFound)
 		}
 	}
 }
 
-func actionThreadPool(eventsToActions <-chan Event, eventsToConnector chan<- Event) {
+func actionThreadPool(toActions <-chan Event, toConnector chan<- Event) {
 	for w := 0; w < runtime.NumCPU(); w++ {
-		go actionWorker(eventsToActions, eventsToConnector)
+		go actionWorker(toActions, toConnector)
 	}
 }
