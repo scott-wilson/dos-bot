@@ -17,8 +17,8 @@ func RegisterAction(eventName string, action func(string) (string, error)) {
 	registeredActions[eventName] = append(registeredActions[eventName], action)
 }
 
-func EmitActions(event string, message string, connector chan<- Event) {
-	connector <- NewEvent(event, message, nil)
+func EmitActions(event string, message string, sender User, room Room, connector chan<- Event) {
+	connector <- NewEvent(event, message, nil, sender, room)
 }
 
 func actionWorker(toActions <-chan Event, toConnector chan<- Event) {
@@ -38,11 +38,11 @@ func actionWorker(toActions <-chan Event, toConnector chan<- Event) {
 			}
 
 			actionFound = true
-			toConnector <- NewEvent(event.Type(), result, err)
+			toConnector <- NewEvent(event.Type(), result, err, event.Sender(), event.Room())
 		}
 
 		if !actionFound {
-			toConnector <- NewEvent(event.Type(), "", ErrNoActionFound)
+			toConnector <- NewEvent(event.Type(), "", ErrNoActionFound, event.Sender(), event.Room())
 		}
 	}
 }
