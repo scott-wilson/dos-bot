@@ -7,10 +7,10 @@ import (
 	"syscall"
 )
 
-var connections []func(Bot, chan<- Event, <-chan Event) func() error
+var connections []func(chan<- Event, <-chan Event) func() error
 var closeFunctions []func() error
 
-func Run(bot Bot) {
+func Run() {
 	for _, connector := range connections {
 		toActions := make(chan Event)
 		toChannel := make(chan Event)
@@ -19,7 +19,7 @@ func Run(bot Bot) {
 		mutex := &sync.Mutex{}
 		mutex.Lock()
 		defer mutex.Unlock()
-		closeFunctions = append(closeFunctions, connector(bot, toActions, toChannel))
+		closeFunctions = append(closeFunctions, connector(toActions, toChannel))
 	}
 
 	defer Close()

@@ -15,7 +15,7 @@ func myAction(input string) (string, error) {
 }
 
 func init() {
-    RegisterAction("listen", myAction)
+    RegisterAction("directed-message", myAction)
 }
 ```
 # New Connections
@@ -26,7 +26,7 @@ func myConnector(bot Bot, toActions chan<- Event, toChannel <-chan Event) {
     // Inputs
     go func() {
         // Query from service (Discord, Slack, Rocket.Chat, etc) here.
-        EmitActions("listen", "test", toActions)
+        EmitActions("directed-message", "test", toActions)
     }()
 
     // Outputs
@@ -51,7 +51,7 @@ func main() {
     bot := NewBot("test")
 
     // Register actions first
-    dosbot.RegisterAction("listen", myAction)
+    dosbot.RegisterAction("directed-message", myAction)
 
     // Register connectors
     RegisterConnector(myConnector)
