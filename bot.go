@@ -1,13 +1,11 @@
 package dosbot
 
-type Bot struct {
-	name string
-}
+import (
+	"regexp"
+)
 
-func NewBot(name string) (Bot, error) {
-	return Bot{name: name}, nil
-}
-
-func (bot Bot) Name() string {
-	return bot.name
+type Bot interface {
+	Name() string
+	ID() interface{}
+	DirectedMessageRegex() *regexp.Regexp
 }

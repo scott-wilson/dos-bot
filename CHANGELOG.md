@@ -8,7 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Function based actions
 - Function based connectors
-- Test terminal connector
 - User and room metadata for events
+- Event helpers to help developing actions and connections
+
+### Removed
+- Test terminal connector
 
 [Unreleased]: https://github.com/scott-wilson/dosbot/compare/...HEAD
