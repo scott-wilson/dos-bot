@@ -10,8 +10,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Function based connectors
 - User and room metadata for events
 - Event helpers to help developing actions and connections
+- Functions to the bot to send messages to a direct user, the channel, or private message.
+### Changed
+- Actions now use events to send/receive messages instead of strings.
 
 ### Removed
 - Test terminal connector
+
 
 [Unreleased]: https://github.com/scott-wilson/dosbot/compare/...HEAD
