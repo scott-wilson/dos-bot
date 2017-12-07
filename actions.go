@@ -10,10 +10,10 @@ import (
 
 var registeredActions = make(map[string][]action)
 
-var helpRegex = regexp.MustCompile(`(?i)help[\t ]*(.*)`)
+var helpRegex = regexp.MustCompile(`(?i)help`)
 
-func RegisterAction(eventName string, event func(Event) error, title string, shortDescription string, longDescription string) {
-	action := action{Event: event, Title: title, ShortDescription: shortDescription, LongDescription: longDescription}
+func RegisterAction(eventName string, event func(Event) error, signature string, description string) {
+	action := action{Event: event, Signature: signature, Description: description}
 	registeredActions[eventName] = append(registeredActions[eventName], action)
 }
 
@@ -66,10 +66,9 @@ func actionThreadPool(toActions <-chan Event, toConnector chan<- Event) {
 }
 
 type action struct {
-	Event            func(Event) error
-	Title            string
-	ShortDescription string
-	LongDescription  string
+	Event       func(Event) error
+	Signature   string
+	Description string
 }
 
 // ----------------
@@ -77,28 +76,11 @@ type action struct {
 // ----------------
 
 func helpAction(event Event) error {
-	message := ""
-
-	result := helpRegex.FindStringSubmatch(event.Message())
-
-	if result[1] != "" {
-		message = "Could not find that action."
-		toSearch := strings.ToLower(result[1])
-
-		for _, action := range listAllActions() {
-			if strings.ToLower(action.Title) == toSearch {
-				message = helpOnAction(action)
-				break
-			}
-		}
-	} else {
-		message = helpOnAllActions()
-	}
-
-	if message == "" {
+	if helpRegex.FindString(event.Message()) == "" {
 		return nil
 	}
 
+	message := helpOnAllActions()
 	sender := event.Sender()
 	room := event.Room()
 	bot := event.Bot()
@@ -119,13 +101,13 @@ func helpOnAllActions() string {
 	message := "Here are the actions that I understand:\n"
 
 	sort.Slice(allActions, func(i, j int) bool {
-		return allActions[i].Title < allActions[j].Title
+		return allActions[i].Signature < allActions[j].Signature
 	})
 
 	allActionsHelp := make([]string, len(allActions))
 
 	for index, action := range allActions {
-		allActionsHelp[index] = fmt.Sprintf("%s - %s", action.Title, action.ShortDescription)
+		allActionsHelp[index] = fmt.Sprintf("%s: %s", action.Signature, action.Description)
 	}
 
 	actionList := strings.Join(allActionsHelp, "\n")
@@ -134,10 +116,6 @@ func helpOnAllActions() string {
 	return message
 }
 
-func helpOnAction(action action) string {
-	return fmt.Sprintf("%s\n\n%s\n\n%s", action.Title, action.ShortDescription, action.LongDescription)
-}
-
 func init() {
-	RegisterAction(EventDirectedMessage, helpAction, "Help", "Show list of supported actions with @dos help or more information about a specific action with @dos help <action>", "Nothing more to say about that...")
+	RegisterAction(EventDirectedMessage, helpAction, "help", "Show list of supported actions with ")
 }
