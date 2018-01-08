@@ -1,6 +1,7 @@
 package dosbot
 
 import (
+	"log"
 	"os"
 	"os/signal"
 	"sync"
@@ -11,6 +12,8 @@ var connections []func(chan<- Event, <-chan Event) func() error
 var closeFunctions []func() error
 
 func Run() {
+	log.Println("Starting bot.")
+
 	for _, connector := range connections {
 		toActions := make(chan Event)
 		toChannel := make(chan Event)
@@ -29,6 +32,8 @@ func Run() {
 }
 
 func Close() error {
+	log.Println("Closing bot.")
+
 	for _, close := range closeFunctions {
 		if err := close(); err != nil {
 			return err
