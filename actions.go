@@ -2,6 +2,7 @@ package dosbot
 
 import (
 	"fmt"
+	"log"
 	"regexp"
 	"runtime"
 	"sort"
@@ -13,23 +14,28 @@ var registeredActions = make(map[string][]action)
 var helpRegex = regexp.MustCompile(`(?i)help`)
 
 func RegisterAction(eventName string, event func(Event) error, signature string, description string) {
+	log.Printf("Registering action.\n\tEvent Name: %s\n\tEvent: %v\n\tSignature: %s\n\tDescription: %s\n", eventName, event, signature, description)
 	action := action{Event: event, Signature: signature, Description: description}
 	registeredActions[eventName] = append(registeredActions[eventName], action)
 }
 
 func EmitActions(event string, message string, sender User, room Room, bot Bot, connector chan<- Event) {
+	log.Printf("Emitting action.\n\tEvent: %s\n\tMessage: %s\n\tUser: %#v\n\tRoom: %#v\n\tBot: %#v\n", event, message, sender, room, bot)
 	connector <- NewEvent(event, message, nil, sender, room, bot)
 }
 
 func EmitDirectedMessageActions(message string, sender User, room Room, bot Bot, connector chan<- Event) {
+	log.Printf("Emitting directed action.\n\tMessage: %s\n\tUser: %#v\n\tRoom: %#v\n\tBot: %#v\n", message, sender, room, bot)
 	EmitActions(EventDirectedMessage, message, sender, room, bot, connector)
 }
 
 func EmitChannelMessageActions(message string, sender User, room Room, bot Bot, connector chan<- Event) {
+	log.Printf("Emitting channel message action.\n\tMessage: %s\n\tUser: %#v\n\tRoom: %#v\n\tBot: %#v\n", message, sender, room, bot)
 	EmitActions(EventChannelMessage, message, sender, room, bot, connector)
 }
 
 func EmitMessageActions(message string, sender User, room Room, bot Bot, connector chan<- Event) {
+	log.Printf("Emitting message action.\n\tMessage: %s\n\tUser: %#v\n\tRoom: %#v\n\tBot: %#v\n", message, sender, room, bot)
 	regex := bot.DirectedMessageRegex()
 	result := regex.FindStringSubmatch(message)
 
